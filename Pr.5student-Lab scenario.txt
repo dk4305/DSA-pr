@@ -1,0 +1,88 @@
+Pr.5student-Lab scenario
+
+CREATE TABLE Class ( 
+class VARCHAR(20) PRIMARY KEY, 
+descrip VARCHAR(100) 
+); 
+CREATE TABLE Student ( 
+stud_no INT PRIMARY KEY, 
+stud_name VARCHAR(100), 
+class VARCHAR(20), 
+FOREIGN KEY (class) REFERENCES Class(class) 
+); 
+CREATE TABLE Lab ( 
+mach_no INT PRIMARY KEY, 
+lab_no INT NOT NULL, 
+description VARCHAR(100) 
+); 
+CREATE TABLE Allotment ( 
+stud_no INT, 
+mach_no INT, 
+dayofweek VARCHAR(20), 
+PRIMARY KEY (stud_no, mach_no, dayofweek), 
+FOREIGN KEY (stud_no) REFERENCES Student(stud_no), 
+FOREIGN KEY (mach_no) REFERENCES Lab(mach_no) 
+); -- Classes 
+INSERT INTO Class VALUES 
+('CSIT', 'Computer Science and IT'), 
+('ECE', 'Electronics and Communication'), 
+('ME', 'Mechanical Engineering'), 
+('CIVIL', 'Civil Engineering'); -- Students 
+INSERT INTO Student VALUES 
+(1, 'Ravi', 'CSIT'), (2, 'Meena', 'ECE'), (3, 'Ajay', 'CSIT'), 
+(4, 'Priya', 'ME'), (5, 'Vikram', 'CSIT'), (6, 'Anita', 'CIVIL'), 
+(7, 'Suresh', 'ECE'), (8, 'Kavita', 'CSIT'), (9, 'Nitin', 'ME'), (10, 'Pooja', 'CIVIL'); -- Labs 
+INSERT INTO Lab VALUES 
+(101, 1, 'Python Programming'), (102, 1, 'Data Structures'), 
+(103, 2, 'VLSI Design'), (104, 2, 'Microcontrollers'), 
+(105, 3, 'CAD Lab'), (106, 3, 'Thermodynamics'), 
+(107, 1, 'OOP Lab'), (108, 2, 'Signal Processing'), 
+(109, 3, 'Strength of Materials'), (110, 1, 'Networking Lab'); -- Allotments 
+INSERT INTO Allotment VALUES 
+(1, 101, 'Monday'), (2, 103, 'Monday'), (3, 102, 'Tuesday'), 
+(4, 105, 'Wednesday'), (5, 101, 'Thursday'), (6, 109, 'Friday'), 
+(7, 108, 'Thursday'), (8, 107, 'Thursday'), (9, 106, 'Monday'), (10, 110, 'Tuesday'); 
+List all machine allotments with student names, lab, and machine numbers 
+SELECT s.stud_name, l.lab_no, a.mach_no 
+FROM Allotment a 
+JOIN Student s ON a.stud_no = s.stud_no 
+JOIN Lab l ON a.mach_no = l.mach_no; 
+List the total number of lab allotments day-wise 
+SELECT dayofweek, COUNT(*) AS total_allotments 
+FROM Allotment 
+GROUP BY dayofweek; 
+Count of how many machines allocated to 'CSIT' class 
+SELECT COUNT(*) AS machines_allocated_to_CSIT 
+FROM Allotment a 
+JOIN Student s ON a.stud_no = s.stud_no 
+WHERE s.class = 'CSIT'; 
+Machine allotment details of stud_no = 5 with personal and class details 
+SELECT s.stud_no, s.stud_name, s.class, a.mach_no, a.dayofweek, l.lab_no, l.description 
+FROM Student s 
+JOIN Allotment a ON s.stud_no = a.stud_no 
+JOIN Lab l ON a.mach_no = l.mach_no 
+WHERE s.stud_no = 5; 
+Count of machines allocated in Lab_no = 1 on “Monday” 
+SELECT COUNT(*) AS machines_allocated 
+FROM Allotment a 
+JOIN Lab l ON a.mach_no = l.mach_no 
+WHERE l.lab_no = 1 AND a.dayofweek = 'Monday'; 
+Number of students class-wise who have machine allotments 
+SELECT s.class, COUNT(DISTINCT s.stud_no) AS total_students 
+FROM Allotment a 
+JOIN Student s ON a.stud_no = s.stud_no 
+GROUP BY s.class; 
+Create a view: stud_no, stud_name, mach_no, lab_no, dayofweek 
+CREATE VIEW StudentLabAllotment AS 
+SELECT s.stud_no, s.stud_name, a.mach_no, l.lab_no, a.dayofweek 
+FROM Allotment a 
+JOIN Student s ON a.stud_no = s.stud_no 
+JOIN Lab l ON a.mach_no = l.mach_no; 
+Create a view with machine allotment details for “Thursday” 
+CREATE VIEW ThursdayAllotments AS 
+SELECT s.stud_no, s.stud_name, l.lab_no, a.mach_no, a.dayofweek 
+FROM Allotment a 
+JOIN Student s ON a.stud_no = s.stud_no 
+JOIN Lab l ON a.mach_no = l.mach_no 
+WHERE a.dayofweek = 'Thursday'; 
+

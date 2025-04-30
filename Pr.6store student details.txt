@@ -1,0 +1,48 @@
+Pr.6store student details
+
+CREATE TABLE Student ( 
+roll_no INT PRIMARY KEY, 
+name VARCHAR(100), 
+subj1 INT CHECK(subj1 BETWEEN 0 AND 100), 
+subj2 INT CHECK(subj2 BETWEEN 0 AND 100), 
+subj3 INT CHECK(subj3 BETWEEN 0 AND 100), 
+subj4 INT CHECK(subj4 BETWEEN 0 AND 100), 
+subj5 INT CHECK(subj5 BETWEEN 0 AND 100) 
+); 
+INSERT INTO Student VALUES 
+(1, 'Ravi', 85, 90, 88, 92, 87), 
+(2, 'Priya', 70, 65, 75, 80, 72), 
+(3, 'Aman', 55, 60, 58, 52, 57), 
+(4, 'Nina', 95, 98, 97, 96, 99), 
+(5, 'Jay', 40, 35, 45, 38, 42); 
+DELIMITER $$ 
+CREATE FUNCTION get_grade(rno INT) 
+RETURNS VARCHAR(2) 
+DETERMINISTIC 
+BEGIN 
+DECLARE total INT; 
+DECLARE percentage FLOAT; 
+DECLARE grade VARCHAR(2); 
+SELECT subj1 + subj2 + subj3 + subj4 + subj5 INTO total 
+FROM Student 
+WHERE roll_no = rno; 
+SET percentage = total / 5; 
+IF percentage >= 90 THEN 
+SET grade = 'A+'; 
+ELSEIF percentage >= 80 THEN 
+SET grade = 'A'; 
+ELSEIF percentage >= 70 THEN 
+SET grade = 'B'; 
+ELSEIF percentage >= 60 THEN 
+SET grade = 'C'; 
+ELSEIF percentage >= 50 THEN 
+SET grade = 'D'; 
+ELSE 
+SET grade = 'F'; 
+END IF; 
+RETURN grade; 
+END$$ 
+DELIMITER ; 
+SELECT get_grade(1) AS Grade;  -- Output: A 
+SELECT get_grade(4) AS Grade;  -- Output: A+ 
+SELECT get_grade(5) AS Grade;  -- Output: F

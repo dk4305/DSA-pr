@@ -1,0 +1,95 @@
+Pr.2 Student Library
+
+CREATE TABLE Student ( 
+stud_no INT PRIMARY KEY, 
+stud_name VARCHAR(100) NOT NULL 
+); 
+CREATE TABLE Membership ( 
+mem_no INT PRIMARY KEY, 
+stud_no INT, 
+FOREIGN KEY (stud_no) REFERENCES Student(stud_no) 
+); 
+CREATE TABLE Book ( 
+book_no INT PRIMARY KEY, 
+book_name VARCHAR(100) NOT NULL, 
+author VARCHAR(100) NOT NULL 
+); 
+CREATE TABLE Iss_rec ( 
+iss_no INT PRIMARY KEY, 
+iss_date DATE NOT NULL, 
+mem_no INT, 
+book_no INT, 
+FOREIGN KEY (mem_no) REFERENCES Membership(mem_no), 
+FOREIGN KEY (book_no) REFERENCES Book(book_no) 
+); -- Students 
+INSERT INTO Student VALUES  
+(1, 'Anjali'), (2, 'Ravi'), (3, 'Suresh'), (4, 'Meena'), (5, 'Rahul'), 
+(6, 'Kavya'), (7, 'Arjun'), (8, 'Deepa'), (9, 'Neha'), (10, 'Manoj'); -- Memberships 
+INSERT INTO Membership VALUES  
+(101, 1), (102, 2), (103, 3), (104, 4), (105, 5), 
+(106, 6), (107, 7), (108, 8), (109, 9), (110, 10); -- Books 
+INSERT INTO Book VALUES  
+(201, 'DBMS Fundamentals', 'CJDATE'), (202, 'Operating Systems', 'Galvin'),  
+(203, 'Computer Networks', 'Tanenbaum'), (204, 'Java Programming', 'E. Balagurusamy'), 
+(205, 'Data Structures', 'Lipschutz'), (206, 'Python Basics', 'Zelle'),  
+(207, 'Discrete Maths', 'Rosen'), (208, 'Software Engg', 'Sommerville'), 
+(209, 'SQL Guide', 'CJDATE'), (210, 'AI Basics', 'Russell'); -- Issue Records (some for today and past days) 
+INSERT INTO Iss_rec VALUES  
+(301, CURDATE(), 101, 201), (302, CURDATE(), 102, 204),  
+(303, CURDATE(), 105, 209), (304, CURDATE(), 106, 202), 
+(305, CURDATE() - INTERVAL 1 DAY, 103, 206), 
+(306, CURDATE() - INTERVAL 2 DAY, 104, 205), 
+(307, CURDATE() - INTERVAL 3 DAY, 107, 208), 
+(308, CURDATE() - INTERVAL 4 DAY, 108, 210), 
+(309, CURDATE() - INTERVAL 5 DAY, 109, 207), 
+(310, CURDATE() - INTERVAL 6 DAY, 110, 203); 
+List all the student names with their membership numbers 
+SELECT s.stud_name, m.mem_no 
+FROM Student s 
+JOIN Membership m ON s.stud_no = m.stud_no; 
+List all the issues for the current date with student and book names 
+SELECT s.stud_name, b.book_name, ir.iss_no, ir.iss_date 
+FROM Iss_rec ir 
+JOIN Membership m ON ir.mem_no = m.mem_no 
+JOIN Student s ON m.stud_no = s.stud_no 
+JOIN Book b ON ir.book_no = b.book_no 
+WHERE ir.iss_date = CURDATE(); 
+List details of students who borrowed books whose author is 'CJDATE' 
+SELECT DISTINCT s.stud_no, s.stud_name 
+FROM Iss_rec ir 
+JOIN Membership m ON ir.mem_no = m.mem_no 
+JOIN Student s ON m.stud_no = s.stud_no 
+JOIN Book b ON ir.book_no = b.book_no 
+WHERE b.author = 'CJDATE'; 
+Count of how many books have been borrowed by each student 
+SELECT s.stud_no, s.stud_name, COUNT(ir.book_no) AS books_borrowed 
+FROM Student s 
+JOIN Membership m ON s.stud_no = m.stud_no 
+JOIN Iss_rec ir ON m.mem_no = ir.mem_no 
+GROUP BY s.stud_no, s.stud_name; 
+List of books taken by student with stud_no = 5 
+SELECT b.book_no, b.book_name, b.author 
+FROM Iss_rec ir 
+JOIN Membership m ON ir.mem_no = m.mem_no 
+JOIN Book b ON ir.book_no = b.book_no 
+WHERE m.stud_no = 5; 
+Create a view: iss_no, iss_date, stud_name, book_name 
+CREATE VIEW IssuedBooksView AS 
+SELECT  
+ir.iss_no,  
+ir.iss_date,  
+s.stud_name,  
+b.book_name 
+FROM Iss_rec ir 
+JOIN Membership m ON ir.mem_no = m.mem_no 
+JOIN Student s ON m.stud_no = s.stud_no 
+JOIN Book b ON ir.book_no = b.book_no; 
+Create a view listing daily issues for the last one week 
+CREATE VIEW WeeklyIssuesView AS 
+SELECT  
+ir.iss_date,  
+COUNT(*) AS total_issues 
+FROM Iss_rec ir 
+WHERE ir.iss_date >= CURDATE() - INTERVAL 6 DAY 
+GROUP BY ir.iss_date 
+ORDER BY ir.iss_date; 

@@ -1,0 +1,98 @@
+Pr.9● Pattern matching ● Arithmetic operations
+
+-- Author Table 
+CREATE TABLE Author ( 
+author_id INT PRIMARY KEY, 
+name VARCHAR(100) NOT NULL, 
+birth_year INT 
+); -- Book Table 
+CREATE TABLE Book ( 
+book_id INT PRIMARY KEY, 
+title VARCHAR(100) NOT NULL, 
+author_id INT, 
+published_year INT, 
+price DECIMAL(10, 2), 
+quantity INT, 
+FOREIGN KEY (author_id) REFERENCES Author(author_id) 
+); -- Borrower Table 
+CREATE TABLE Borrower ( 
+borrower_id INT PRIMARY KEY, 
+name VARCHAR(100) NOT NULL, 
+contact_info VARCHAR(255), 
+membership_type VARCHAR(50) 
+); -- Insert into Author Table 
+INSERT INTO Author (author_id, name, birth_year) 
+VALUES 
+(1, 'Dr. Smith', 1970), 
+(2, 'Prof. Mehta', 1965), 
+(3, 'Dr. Johnson', 1980); -- Insert into Book Table 
+INSERT INTO Book (book_id, title, author_id, published_year, price, quantity) 
+VALUES 
+(101, 'Database Systems', 1, 2020, 50.00, 100), 
+(102, 'Data Structures', 2, 2019, 40.00, 150), 
+(103, 'Algorithms in C', 3, 2018, 60.00, 200); -- Insert into Borrower Table 
+INSERT INTO Borrower (borrower_id, name, contact_info, membership_type) 
+VALUES 
+(1, 'Aman', '123-456-7890', 'Regular'), 
+(2, 'Nina', '987-654-3210', 'Premium'), 
+(3, 'Ravi', '555-123-9876', 'Regular'); 
+Step 3: SQL Queries for Pattern Matching 
+• Search books where title contains 'Data': 
+SELECT * FROM Book 
+WHERE title LIKE '%Data%'; 
+• Search authors whose name starts with 'Dr.': 
+SELECT * FROM Author 
+WHERE name LIKE 'Dr.%'; 
+• Search borrowers whose name contains 'A': 
+SELECT * FROM Borrower 
+WHERE name LIKE '%A%'; 
+• Search books where the title starts with 'A' and ends with 's': 
+SELECT * FROM Book 
+WHERE title LIKE 'A%s'; 
+Step 4: SQL Queries for Arithmetic Operations 
+• Calculate the total cost of books (price * quantity): 
+SELECT book_id, title, price, quantity, (price * quantity) AS total_cost 
+FROM Book; 
+• Calculate the total cost of all books in the library (sum of price * quantity): 
+SELECT SUM(price * quantity) AS total_library_value 
+FROM Book; 
+• Calculate the average price of books published in 2020: 
+SELECT AVG(price) AS avg_price 
+FROM Book 
+WHERE published_year = 2020; 
+• Calculate the difference in the years between when the book was published and the 
+current year: 
+SELECT title, published_year, (YEAR(CURDATE()) - published_year) AS years_since_published 
+FROM Book; 
+• Calculate the discount on a book given its price (10%): 
+SELECT title, price, (price * 0.10) AS discount 
+FROM Book; 
+Step 5: SQL Queries for Built-in Functions 
+• Convert author's name to uppercase: 
+SELECT name, UPPER(name) AS uppercase_name 
+FROM Author; 
+• Get the length of a book title: 
+SELECT title, LENGTH(title) AS title_length 
+FROM Book; 
+• Trim spaces from a borrower's contact_info: 
+SELECT name, TRIM(contact_info) AS cleaned_contact_info 
+FROM Borrower; 
+• Get the current date: 
+SELECT CURDATE() AS current_date; 
+• Get the current year: 
+SELECT YEAR(CURDATE()) AS current_year; 
+• Get the difference in years between when a book was published and the current date: 
+SELECT title, published_year, TIMESTAMPDIFF(YEAR, STR_TO_DATE(published_year, '%Y'), 
+CURDATE()) AS years_since_published 
+FROM Book; 
+• Round the price of a book to 2 decimal places: 
+SELECT title, price, ROUND(price, 2) AS rounded_price 
+FROM Book; 
+• Find the minimum and maximum price of books: 
+SELECT MIN(price) AS min_price, MAX(price) AS max_price 
+FROM Book; 
+• Find the total number of books borrowed by each borrower: 
+SELECT borrower_id, COUNT(*) AS total_books_borrowed 
+FROM Borrower 
+JOIN Enrollment ON Borrower.borrower_id = Enrollment.borrower_id 
+GROUP BY borrower_id; 

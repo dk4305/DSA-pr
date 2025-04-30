@@ -1,0 +1,64 @@
+17.Write a stored procedure using cursor to reduce price by Rs. 50 of 1st edition of all books
+and store ISBN,Title and reduced price in new table.
+-- Create Books Table
+CREATE TABLE books (
+ ISBN VARCHAR(20) PRIMARY KEY,
+ title VARCHAR(255),
+ edition INT,
+ price INT
+);
+-- Create Reduced Prices Table
+CREATE TABLE reduced_prices (
+ ISBN VARCHAR(20),
+ title VARCHAR(255),
+ reduced_price INT,
+ PRIMARY KEY (ISBN),
+ FOREIGN KEY (ISBN) REFERENCES books(ISBN)
+);
+DELIMITER $$
+CREATE PROCEDURE ReduceBookPrice()
+BEGIN
+ -- Declare necessary variables
+ DECLARE done INT DEFAULT 0;
+ DECLARE v_isbn VARCHAR(20);
+ DECLARE v_title VARCHAR(255);
+ DECLARE v_price INT;
+
+ -- Declare cursor to fetch the first edition books
+ DECLARE cur CURSOR FOR
+ SELECT ISBN, title, price
+ FROM books
+ WHERE edition = 1;
+
+ -- Declare a handler for when no more records are found
+ DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+ -- Open the cursor
+ OPEN cur;
+ -- Loop through all records
+ read_loop: LOOP
+ FETCH cur INTO v_isbn, v_title, v_price;
+ -- If no more records, exit the loop
+ IF done THEN
+ LEAVE read_loop;
+ END IF;
+ -- Reduce the price by Rs. 50
+ SET v_price = v_price - 50;
+ -- Insert the reduced price into the reduced_prices table
+ INSERT INTO reduced_prices (ISBN, title, reduced_price)
+ VALUES (v_isbn, v_title, v_price);
+ END LOOP;
+ -- Close the cursor
+ CLOSE cur;
+END $$
+DELIMITER ;
+-- Insert sample books into books table
+INSERT INTO books (ISBN, title, edition, price)
+VALUES
+('978-1234567890', 'Book A', 1, 500),
+('978-0987654321', 'Book B', 1, 700),
+('978-1122334455', 'Book C', 2, 800),
+('978-2233445566', 'Book D', 1, 650);
+-- Call the stored procedure to reduce prices and store in reduced_prices table
+CALL ReduceBookPrice();
+-- Check the contents of reduced_prices table
+SELECT * FROM reduced_prices;

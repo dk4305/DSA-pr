@@ -1,0 +1,68 @@
+16. Database Schema for a Employee-pay scenario employee(emp_id : integer, emp_name:
+string) department(dept_id: integer, dept_name:string) paydetails(emp_id : integer, dept_id:
+integer, salary: integer, DOJ: date) payroll(emp_id : integer, pay_date: date) Write a cursor
+which will update the salary of all employees as per following conditions: If salary >= 75000
+then increment salary by 5000 If 50000<= salary< 75000 then increment salary by 3000 Else
+then increment salary by 1500
+-- Create Employee Table
+CREATE TABLE employee (
+ emp_id INT PRIMARY KEY,
+ emp_name VARCHAR(100)
+);
+-- Create Department Table
+CREATE TABLE department (
+ dept_id INT PRIMARY KEY,
+ dept_name VARCHAR(100)
+);
+-- Create Paydetails Table
+CREATE TABLE paydetails (
+ emp_id INT,
+ dept_id INT,
+ salary INT,
+ DOJ DATE,
+ PRIMARY KEY (emp_id, dept_id),
+ FOREIGN KEY (emp_id) REFERENCES employee(emp_id),
+ FOREIGN KEY (dept_id) REFERENCES department(dept_id)
+);
+-- Create Payroll Table
+CREATE TABLE payroll (
+ emp_id INT,
+ pay_date DATE,
+ PRIMARY KEY (emp_id, pay_date),
+ FOREIGN KEY (emp_id) REFERENCES employee(emp_id)
+);
+DELIMITER $$
+CREATE PROCEDURE UpdateEmployeeSalaries()
+BEGIN
+ -- Declare necessary variables
+ DECLARE done INT DEFAULT 0;
+ DECLARE emp_id INT;
+ DECLARE salary INT;
+ DECLARE cur CURSOR FOR
+ SELECT emp_id, salary FROM paydetails;
+ DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+ -- Open the cursor
+ OPEN cur;
+ -- Loop through all records
+ read_loop: LOOP
+ FETCH cur INTO emp_id, salary;
+ -- If no more records, exit the loop
+ IF done THEN
+ LEAVE read_loop;
+ END IF;
+ -- Update the salary based on conditions
+ IF salary >= 75000 THEN
+ UPDATE paydetails SET salary = salary + 5000 WHERE emp_id = emp_id;
+ ELSEIF salary >= 50000 AND salary < 75000 THEN
+ UPDATE paydetails SET salary = salary + 3000 WHERE emp_id = emp_id;
+ ELSE
+ UPDATE paydetails SET salary = salary + 1500 WHERE emp_id = emp_id;
+ END IF;
+ END LOOP;
+ -- Close the cursor
+ CLOSE cur;
+END $$
+DELIMITER ;
+-- Call the procedure to update salaries
+CALL UpdateEmployeeSalaries();
+SELECT * FROM paydetails;

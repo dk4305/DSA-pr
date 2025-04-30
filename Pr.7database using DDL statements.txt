@@ -1,0 +1,48 @@
+Pr.7database using DDL statements
+
+Initial Unnormalized Table (UNF) 
+Suppose we begin with a single unnormalized table: 
+StudentInfo(roll_no, name, course1, course2, instructor1, instructor2) 
+This violates 1NF due to multiple course and instructor columns. Let’s normalize it. 
+1NF (Eliminate repeating groups) 
+Separate out repeated attributes into rows: 
+Student(roll_no, name) 
+Enrollment(roll_no, course_name, instructor_name) 
+2NF (Remove partial dependency) 
+Assuming roll_no is the primary key in Student, and (roll_no, course_name) is the key in Enrollment, 
+instructor_name depends only on course_name, not the whole key. So, we create: 
+Course(course_name, instructor_name) 
+3NF (Remove transitive dependency) 
+Assume instructor details are important. We move them to a new table: 
+Instructor(instructor_id, name) 
+Course(course_id, course_name, instructor_id) 
+Now the final schema is in 3NF. 
+Final DDL (in code) -- Instructor Table 
+CREATE TABLE Instructor ( 
+instructor_id INT PRIMARY KEY, 
+name VARCHAR(100) 
+); -- Course Table 
+CREATE TABLE Course ( 
+course_id INT PRIMARY KEY, 
+course_name VARCHAR(100), 
+instructor_id INT, 
+FOREIGN KEY (instructor_id) REFERENCES Instructor(instructor_id) 
+); -- Student Table 
+CREATE TABLE Student ( 
+roll_no INT PRIMARY KEY, 
+name VARCHAR(100) 
+); -- Enrollment Table (many-to-many) 
+CREATE TABLE Enrollment ( 
+roll_no INT, 
+course_id INT, 
+PRIMARY KEY (roll_no, course_id), 
+FOREIGN KEY (roll_no) REFERENCES Student(roll_no), 
+FOREIGN KEY (course_id) REFERENCES Course(course_id) 
+); 
+Example Inserts 
+sql 
+CopyEdit -- Instructors 
+INSERT INTO Instructor VALUES (1, 'Dr. Smith'), (2, 'Prof. Mehta'); -- Courses 
+INSERT INTO Course VALUES (101, 'Database Systems', 1), (102, 'Data Structures', 2); -- Students 
+INSERT INTO Student VALUES (1, 'Aman'), (2, 'Nina'); -- Enrollments 
+INSERT INTO Enrollment VALUES (1, 101), (1, 102), (2, 101);
